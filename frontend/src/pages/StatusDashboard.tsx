@@ -7,6 +7,7 @@ import {
   getDocuments,
   rerunComparisons,
 } from '../api/client';
+import { SkeletonGrid } from '../components/Skeleton';
 
 // Poll every 3 seconds for documents that are still processing.
 const POLL_INTERVAL_MS = 3000;
@@ -258,7 +259,7 @@ function StatusDashboard() {
       {rerunMsg && <div className="page-message page-success">{rerunMsg}</div>}
 
       {loading ? (
-        <div className="empty-state">Loading documents…</div>
+        <SkeletonGrid count={4} />
       ) : documents.length === 0 ? (
         <div className="empty-state">
           No documents yet. Upload a PDF to get started.

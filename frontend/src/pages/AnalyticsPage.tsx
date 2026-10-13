@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnalyticsSummary, getAnalytics } from '../api/client';
+import { SkeletonGrid } from '../components/Skeleton';
 
 // ── Colour palette ──────────────────────────────────────────────────
 const REL_COLORS: Record<string, string> = {
@@ -143,7 +144,7 @@ function AnalyticsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="empty-state">Loading analytics…</div>;
+  if (loading) return <SkeletonGrid count={4} />;
   if (error) return <div className="page-message page-error">{error}</div>;
   if (!data) return null;
 

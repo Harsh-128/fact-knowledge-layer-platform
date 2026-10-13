@@ -6,6 +6,7 @@ import {
   getEntities,
   getEntity,
 } from '../api/client';
+import { SkeletonGrid } from '../components/Skeleton';
 
 const TYPE_COLORS: Record<string, string> = {
   company: '#3b82f6',
@@ -150,7 +151,7 @@ function EntityExplorer() {
             <span>{total} total</span>
           </div>
 
-          {loading && <div className="empty-state">Loading entities…</div>}
+          {loading && <SkeletonGrid count={6} />}
 
           {!loading && entities.length === 0 && (
             <div className="empty-state">No entities found.</div>

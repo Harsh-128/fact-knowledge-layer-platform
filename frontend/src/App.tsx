@@ -9,10 +9,12 @@ import StatusDashboard from './pages/StatusDashboard';
 import ReviewQueue from './pages/ReviewQueue';
 import EntityExplorer from './pages/EntityExplorer';
 import AnalyticsPage from './pages/AnalyticsPage';
+import HomePage from './pages/HomePage';
 
 import './App.css';
 
 type Page =
+  | 'home'
   | 'upload'
   | 'facts'
   | 'document'
@@ -24,6 +26,7 @@ type Page =
   | 'analytics';
 
 const navigation: { id: Page; label: string; icon: string }[] = [
+  { id: 'home',          label: '🏠 Home',        icon: '🏠' },
   { id: 'upload',        label: 'Upload',        icon: '⬆️' },
   { id: 'status',        label: 'Status',         icon: '📊' },
   { id: 'analytics',    label: 'Analytics',      icon: '📈' },
@@ -37,7 +40,7 @@ const navigation: { id: Page; label: string; icon: string }[] = [
 
 function App() {
   const [activePage, setActivePage] =
-    useState<Page>('upload');
+    useState<Page>('home');
 
   const [documentId, setDocumentId] = useState('');
   const [documentFilename, setDocumentFilename] = useState('');
@@ -59,6 +62,9 @@ function App() {
 
   const renderPage = () => {
     switch (activePage) {
+      case 'home':
+        return <HomePage onNavigate={(p) => setActivePage(p as Page)} />;
+
       case 'upload':
         return (
           <UploadPage

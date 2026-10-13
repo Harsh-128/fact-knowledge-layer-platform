@@ -10,6 +10,7 @@ import {
   getFacts,
 } from '../api/client';
 import FactCard from '../components/FactCard';
+import { SkeletonGrid } from '../components/Skeleton';
 
 const PAGE_SIZE = 50;
 
@@ -265,7 +266,7 @@ function FactExplorer() {
             </span>
           </div>
 
-          {loading && <div className="empty-state">Loading facts...</div>}
+          {loading && <SkeletonGrid count={6} />}
 
           {!loading && !error && facts.length === 0 && (
             <div className="empty-state">
