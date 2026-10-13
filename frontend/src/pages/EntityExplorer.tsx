@@ -1,8 +1,10 @@
 import { FormEvent, useEffect, useState } from 'react';
 
 import {
+  Document,
   EntityDetail,
   EntitySummary,
+  getDocuments,
   getEntities,
   getEntity,
 } from '../api/client';
@@ -36,6 +38,22 @@ function EntityExplorer() {
 
   const [selectedEntity, setSelectedEntity] = useState<EntityDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [docMap, setDocMap] = useState<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    getDocuments({ limit: 100 })
+      .then((docs) =>
+        setDocMap(
+          new Map(
+            docs.map((d: Document) => [
+              d.id,
+              d.filename.replace(/^document:[a-f0-9]+_/, ''),
+            ]),
+          ),
+        ),
+      )
+      .catch(() => {});
+  }, []);
 
   const loadEntities = async (searchVal = search, typeVal = typeFilter) => {
     setLoading(true);
@@ -235,7 +253,7 @@ function EntityExplorer() {
                   <strong>Appears in:</strong>
                   <ul>
                     {selectedEntity.document_ids.map((docId) => (
-                      <li key={docId}>{cleanDocId(docId)}</li>
+                      <li key={docId}>{docMap.get(docId) ?? cleanDocId(docId)}</li>
                     ))}
                   </ul>
                 </div>
@@ -262,7 +280,7 @@ function EntityExplorer() {
                             {Math.round(fact.confidence * 100)}%
                           </span>
                           <span className="entity-fact-doc">
-                            {cleanDocId(fact.document_id)}
+                            {docMap.get(fact.document_id) ?? cleanDocId(fact.document_id)}
                           </span>
                           {fact.temporal_scope && (
                             <span className="entity-fact-period">

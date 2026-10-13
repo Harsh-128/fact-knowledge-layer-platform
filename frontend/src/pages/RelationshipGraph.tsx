@@ -376,12 +376,12 @@ function RelationshipGraph() {
               )}
               <div className="graph-detail-facts">
                 <div className="graph-detail-fact">
-                  <strong>{srcFact?.attribute ?? selectedRel.source_fact_id}</strong>
+                  <strong>{srcFact?.attribute ?? 'Fact ' + selectedRel.source_fact_id.slice(0, 8)}</strong>
                   <p>{srcFact ? `${String(srcFact.value)}${srcFact.unit ? ` ${srcFact.unit}` : ''}` : '—'}</p>
                 </div>
                 <div className="graph-detail-arrow">→</div>
                 <div className="graph-detail-fact">
-                  <strong>{tgtFact?.attribute ?? selectedRel.target_fact_id}</strong>
+                  <strong>{tgtFact?.attribute ?? 'Fact ' + selectedRel.target_fact_id.slice(0, 8)}</strong>
                   <p>{tgtFact ? `${String(tgtFact.value)}${tgtFact.unit ? ` ${tgtFact.unit}` : ''}` : '—'}</p>
                 </div>
               </div>
@@ -418,7 +418,7 @@ function RelationshipGraph() {
                     <span>Source fact</span>
                     <strong>
                       {sourceFact?.attribute ??
-                        relationship.source_fact_id}
+                        'Fact ' + relationship.source_fact_id.slice(0, 8)}
                     </strong>
 
                     {sourceFact && (
@@ -439,7 +439,7 @@ function RelationshipGraph() {
                     <span>Target fact</span>
                     <strong>
                       {targetFact?.attribute ??
-                        relationship.target_fact_id}
+                        'Fact ' + relationship.target_fact_id.slice(0, 8)}
                     </strong>
 
                     {targetFact && (

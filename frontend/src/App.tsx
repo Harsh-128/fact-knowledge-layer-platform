@@ -11,6 +11,7 @@ import ReviewQueue from './pages/ReviewQueue';
 import EntityExplorer from './pages/EntityExplorer';
 import AnalyticsPage from './pages/AnalyticsPage';
 import HomePage from './pages/HomePage';
+import { ToastProvider } from './components/Toast';
 
 import './App.css';
 
@@ -146,7 +147,7 @@ function App() {
         return <ComparePage />;
 
       case 'status':
-        return <StatusDashboard />;
+        return <StatusDashboard onDocumentSelect={handleDocumentSelect} />;
 
       case 'review':
         return <ReviewQueue />;
@@ -163,39 +164,41 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <aside className="app-sidebar">
-        <div className="sidebar-brand">
-          <div className="sidebar-logo">
-            <div className="sidebar-logo-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
-              </svg>
+    <ToastProvider>
+      <div className="app">
+        <aside className="app-sidebar">
+          <div className="sidebar-brand">
+            <div className="sidebar-logo">
+              <div className="sidebar-logo-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+                </svg>
+              </div>
+              <span className="sidebar-logo-text">Fact Layer</span>
             </div>
-            <span className="sidebar-logo-text">Fact Layer</span>
+            <div className="sidebar-tagline">Knowledge extraction platform</div>
           </div>
-          <div className="sidebar-tagline">Knowledge extraction platform</div>
+          <nav className="app-navigation">
+            {navigation.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activePage === item.id ? 'nav-button active' : 'nav-button'}
+                onClick={() => setActivePage(item.id)}
+              >
+                <span className="nav-icon">{Icons[item.id]}</span>
+                <span className="nav-label">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+        <div className="app-content">
+          <main className="app-main">
+            {renderPage()}
+          </main>
         </div>
-        <nav className="app-navigation">
-          {navigation.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={activePage === item.id ? 'nav-button active' : 'nav-button'}
-              onClick={() => setActivePage(item.id)}
-            >
-              <span className="nav-icon">{Icons[item.id]}</span>
-              <span className="nav-label">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-      <div className="app-content">
-        <main className="app-main">
-          {renderPage()}
-        </main>
       </div>
-    </div>
+    </ToastProvider>
   );
 }
 

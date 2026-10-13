@@ -63,11 +63,21 @@ function FactCard({ fact, onSelect }: FactCardProps) {
       </div>
 
       <div className="fact-metadata">
-        <span>
+        <span
+          style={{
+            padding: '2px 8px',
+            borderRadius: '999px',
+            fontSize: '11px',
+            fontWeight: 600,
+            ...(confidence >= 0.8
+              ? { background: 'rgba(16,185,129,0.15)', color: '#10b981' }
+              : confidence >= 0.5
+              ? { background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }
+              : { background: 'rgba(239,68,68,0.15)',  color: '#ef4444' }),
+          }}
+        >
           {confidenceLabel(confidence)} · {Math.round(confidence * 100)}%
         </span>
-
-        <span>Entity: {fact.entity_id.replace(/^entity-/, '').substring(0, 8)}…</span>
       </div>
 
       {fact.temporal_scope && (

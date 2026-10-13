@@ -9,8 +9,10 @@ import {
   getDocuments,
 } from '../api/client';
 import RelationshipBadge from '../components/RelationshipBadge';
+import { useToast } from '../components/Toast';
 
 function ComparePage() {
+  const { showToast } = useToast();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<CompareResponse | null>(null);
@@ -81,12 +83,14 @@ function ComparePage() {
         }
       });
       setFactCache(newCache);
+      showToast(`Comparison complete — ${response.relationships_created} relationship${response.relationships_created !== 1 ? 's' : ''} found.`, 'success');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('Comparison failed. Make sure the backend is running.');
       }
+      showToast('Comparison failed.', 'error');
     } finally {
       setLoading(false);
     }

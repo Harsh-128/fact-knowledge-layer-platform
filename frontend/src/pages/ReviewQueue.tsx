@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Document, EntitySummary, Fact, getDocuments, getEntities, getFacts, reviewFact } from '../api/client';
+import { useToast } from '../components/Toast';
 
 type ReviewState = 'pending' | 'accepted' | 'rejected';
 
@@ -10,6 +11,7 @@ interface ReviewedFact {
 }
 
 function ReviewQueue() {
+  const { showToast } = useToast();
   const [items, setItems] = useState<ReviewedFact[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,8 +64,10 @@ function ReviewQueue() {
             : item,
         ),
       );
+      showToast(accept ? 'Fact accepted.' : 'Fact rejected.', accept ? 'success' : 'info');
     } catch {
       setError(`Failed to save decision for fact ${factId}.`);
+      showToast('Failed to save decision.', 'error');
     } finally {
       setSaving(null);
     }

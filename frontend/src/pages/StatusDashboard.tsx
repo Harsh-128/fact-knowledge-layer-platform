@@ -42,10 +42,12 @@ function DocumentCard({
   doc,
   statusData,
   onRerun,
+  onDocumentSelect,
 }: {
   doc: Document;
   statusData: DocumentStatus | null;
   onRerun: (id: string) => void;
+  onDocumentSelect?: (id: string, filename: string) => void;
 }) {
   const statusKey = statusData?.status ?? doc.status;
   const label = STATUS_LABELS[statusKey] ?? statusKey;
@@ -58,7 +60,11 @@ function DocumentCard({
     : null;
 
   return (
-    <div className={`status-card status-card--${statusKey}`}>
+    <div
+      className={`status-card status-card--${statusKey}`}
+      onClick={() => onDocumentSelect?.(doc.id, filename)}
+      style={{ cursor: onDocumentSelect ? 'pointer' : undefined }}
+    >
       <div className="status-card-header">
         <div className="status-card-name">
           <span className="status-badge" style={{ color }}>
@@ -128,11 +134,14 @@ function DocumentCard({
           )}
         </>
       )}
+      {onDocumentSelect && (
+        <div className="status-card-view-link">View facts →</div>
+      )}
     </div>
   );
 }
 
-function StatusDashboard() {
+function StatusDashboard({ onDocumentSelect }: { onDocumentSelect?: (id: string, filename: string) => void }) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [statusMap, setStatusMap] = useState<Record<string, DocumentStatus>>({});
   const [loading, setLoading] = useState(false);
@@ -272,6 +281,7 @@ function StatusDashboard() {
               doc={doc}
               statusData={statusMap[doc.id] ?? null}
               onRerun={handleRerun}
+              onDocumentSelect={onDocumentSelect}
             />
           ))}
         </div>

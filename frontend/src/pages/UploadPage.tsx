@@ -12,6 +12,7 @@ import {
   getJobStatus,
   uploadDocument,
 } from '../api/client';
+import { useToast } from '../components/Toast';
 
 interface UploadPageProps {
   onDocumentUploaded?: (documentId: string, filename: string) => void;
@@ -20,6 +21,7 @@ interface UploadPageProps {
 function UploadPage({
   onDocumentUploaded,
 }: UploadPageProps) {
+  const { showToast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadResult, setUploadResult] =
     useState<DocumentUploadResponse | null>(null);
@@ -149,6 +151,7 @@ function UploadPage({
           setJobResult(result.result ?? null);
           const documentId =
             result.result?.document_id ?? uploadResult.document_id;
+          showToast('Document processed successfully!', 'success');
           onDocumentUploaded?.(documentId, uploadResult.filename);
           return;
         }
@@ -161,6 +164,7 @@ function UploadPage({
             result.error ??
               'Document processing failed.',
           );
+          showToast(result.error ?? 'Document processing failed.', 'error');
           return;
         }
 
@@ -228,10 +232,11 @@ function UploadPage({
         uploadError.message
       ) {
         setError(uploadError.message);
+        showToast(uploadError.message, 'error');
       } else {
-        setError(
-          'Upload failed. Make sure the FastAPI backend is running.',
-        );
+        const errorMessage = 'Upload failed. Make sure the FastAPI backend is running.';
+        setError(errorMessage);
+        showToast(errorMessage, 'error');
       }
     } finally {
       setIsUploading(false);
