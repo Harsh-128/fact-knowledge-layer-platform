@@ -67,7 +67,7 @@ function FactCard({ fact, onSelect }: FactCardProps) {
           {confidenceLabel(confidence)} · {Math.round(confidence * 100)}%
         </span>
 
-        <span>Entity: {fact.entity_id}</span>
+        <span>Entity: {fact.entity_id.replace(/^entity-/, '').substring(0, 8)}…</span>
       </div>
 
       {fact.temporal_scope && (

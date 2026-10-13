@@ -7,6 +7,7 @@ import {
   exportFactsAsCsv,
   getDocuments,
   getEntities,
+  getEntity,
   getFacts,
 } from '../api/client';
 import FactCard from '../components/FactCard';
@@ -35,6 +36,8 @@ function FactExplorer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFact, setSelectedFact] = useState<Fact | null>(null);
+  const [selectedEntityName, setSelectedEntityName] = useState<string>('');
+  const [selectedDocName, setSelectedDocName] = useState<string>('');
 
   // Fetch documents on mount for the dropdown
   useEffect(() => {
@@ -106,6 +109,20 @@ function FactExplorer() {
     void loadFacts(0);
   };
 
+  const handleSelectFact = async (fact: Fact) => {
+    setSelectedFact(fact);
+    // Resolve document filename from already-loaded list
+    const doc = documents.find((d) => d.id === fact.document_id);
+    setSelectedDocName(doc?.filename ?? fact.document_id);
+    // Resolve entity name via API
+    try {
+      const entity = await getEntity(fact.entity_id);
+      setSelectedEntityName(entity.canonical_name);
+    } catch {
+      setSelectedEntityName(fact.entity_id);
+    }
+  };
+
   const clearFilters = () => {
     setDocumentId('');
     setEntityId('');
@@ -114,6 +131,8 @@ function FactExplorer() {
     setSortOrder('default');
     setPage(0);
     setSelectedFact(null);
+    setSelectedEntityName('');
+    setSelectedDocName('');
     setEntitySearch('');
     setEntitySuggestions([]);
     setShowEntitySuggestions(false);
@@ -275,7 +294,7 @@ function FactExplorer() {
           )}
 
           {!loading && facts.map((fact) => (
-            <FactCard key={fact.id} fact={fact} onSelect={setSelectedFact} />
+            <FactCard key={fact.id} fact={fact} onSelect={handleSelectFact} />
           ))}
 
           {/* Pagination */}
@@ -314,13 +333,36 @@ function FactExplorer() {
               </div>
 
               <dl>
-                <div><dt>Fact ID</dt><dd>{selectedFact.id}</dd></div>
-                <div><dt>Entity</dt><dd>{selectedFact.entity_id}</dd></div>
-                <div><dt>Document</dt><dd>{selectedFact.document_id}</dd></div>
+                <div>
+                  <dt>Entity</dt>
+                  <dd>{selectedEntityName || selectedFact.entity_id}</dd>
+                </div>
+                <div>
+                  <dt>Document</dt>
+                  <dd>{selectedDocName || selectedFact.document_id}</dd>
+                </div>
                 <div>
                   <dt>Confidence</dt>
-                  <dd>{Math.round(selectedFact.confidence * 100)}%</dd>
+                  <dd style={{ color: selectedFact.confidence >= 0.8 ? '#10b981' : selectedFact.confidence >= 0.5 ? '#f59e0b' : '#ef4444', fontWeight: 700 }}>
+                    {Math.round(selectedFact.confidence * 100)}%
+                  </dd>
                 </div>
+                {selectedFact.temporal_scope && (
+                  <div>
+                    <dt>Time Period</dt>
+                    <dd>{String(
+                      (selectedFact.temporal_scope as Record<string, unknown>).period_label ??
+                      (selectedFact.temporal_scope as Record<string, unknown>).granularity ??
+                      'Not specified'
+                    )}</dd>
+                  </div>
+                )}
+                {selectedFact.needs_review && (
+                  <div>
+                    <dt>Status</dt>
+                    <dd style={{ color: '#f59e0b' }}>⚠ Needs review</dd>
+                  </div>
+                )}
               </dl>
 
               {selectedFact.evidence.length > 0 && (
