@@ -247,7 +247,7 @@ function StatusDashboard() {
           <span>Need review</span>
         </div>
         <div>
-          <strong style={{ color: processing > 0 ? '#3b82f6' : '#10b981' }}>
+          <strong style={{ color: processing > 0 ? '#a5b4fc' : '#10b981' }}>
             {processing > 0 ? `${processing} processing` : 'All done'}
           </strong>
           <span>Pipeline status</span>

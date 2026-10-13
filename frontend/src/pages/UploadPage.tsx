@@ -180,6 +180,7 @@ function UploadPage({
 
       <form className="upload-form" onSubmit={handleSubmit}>
         <label className="file-dropzone">
+          <span className="file-dropzone-icon">📂</span>
           <span className="file-dropzone-title">
             Choose a PDF document
           </span>

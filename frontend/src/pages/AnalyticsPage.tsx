@@ -82,16 +82,16 @@ function DonutChart({
     <div className="donut-wrap">
       <svg width={size} height={size} viewBox="0 0 140 140">
         {paths.map(({ sl, d }) => (
-          <path key={sl.label} d={d} fill={sl.color} stroke="#fff" strokeWidth={1.5}>
+          <path key={sl.label} d={d} fill={sl.color} stroke="#1a2035" strokeWidth={1.5}>
             <title>{sl.label}: {sl.value}</title>
           </path>
         ))}
         {/* inner hole */}
-        <circle cx={cx} cy={cy} r={28} fill="#fff" />
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#111">
+        <circle cx={cx} cy={cy} r={28} fill="#1a2035" />
+        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#f1f5f9">
           {total}
         </text>
-        <text x={cx} y={cy + 10} textAnchor="middle" fontSize="8" fill="#9ca3af">
+        <text x={cx} y={cy + 10} textAnchor="middle" fontSize="8" fill="#64748b">
           total
         </text>
       </svg>

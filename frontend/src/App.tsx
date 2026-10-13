@@ -23,16 +23,16 @@ type Page =
   | 'entities'
   | 'analytics';
 
-const navigation: { id: Page; label: string }[] = [
-  { id: 'upload', label: 'Upload' },
-  { id: 'status', label: '📊 Status' },
-  { id: 'analytics', label: '📈 Analytics' },
-  { id: 'facts', label: 'Fact Explorer' },
-  { id: 'entities', label: '🏢 Entities' },
-  { id: 'review', label: '🔍 Review' },
-  { id: 'document', label: 'Document View' },
-  { id: 'relationships', label: 'Relationships' },
-  { id: 'compare', label: 'Compare' },
+const navigation: { id: Page; label: string; icon: string }[] = [
+  { id: 'upload',        label: 'Upload',        icon: '⬆️' },
+  { id: 'status',        label: 'Status',         icon: '📊' },
+  { id: 'analytics',    label: 'Analytics',      icon: '📈' },
+  { id: 'facts',         label: 'Fact Explorer',  icon: '🔎' },
+  { id: 'entities',     label: 'Entities',       icon: '🏢' },
+  { id: 'review',        label: 'Review Queue',   icon: '✅' },
+  { id: 'document',     label: 'Document View',  icon: '📄' },
+  { id: 'relationships', label: 'Relationships',  icon: '🔗' },
+  { id: 'compare',       label: 'Compare',        icon: '⚖️' },
 ];
 
 function App() {
@@ -103,35 +103,33 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="brand">
-          <h1>Fact Knowledge Layer</h1>
-          <p>
-            Grounded fact extraction and cross-document reasoning
-          </p>
+      <aside className="app-sidebar">
+        <div className="sidebar-brand">
+          <div className="sidebar-logo">
+            <div className="sidebar-logo-icon">⬡</div>
+            <span className="sidebar-logo-text">Fact Layer</span>
+          </div>
+          <div className="sidebar-tagline">Knowledge extraction platform</div>
         </div>
-
         <nav className="app-navigation">
           {navigation.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={
-                activePage === item.id
-                  ? 'nav-button active'
-                  : 'nav-button'
-              }
+              className={activePage === item.id ? 'nav-button active' : 'nav-button'}
               onClick={() => setActivePage(item.id)}
             >
-              {item.label}
+              <span className="nav-icon">{item.icon}</span>
+              <span>{item.label}</span>
             </button>
           ))}
         </nav>
-      </header>
-
-      <main className="app-main">
-        {renderPage()}
-      </main>
+      </aside>
+      <div className="app-content">
+        <main className="app-main">
+          {renderPage()}
+        </main>
+      </div>
     </div>
   );
 }
