@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { Fact, getFacts, reviewFact } from '../api/client';
+import { Document, EntitySummary, Fact, getDocuments, getEntities, getFacts, reviewFact } from '../api/client';
 
 type ReviewState = 'pending' | 'accepted' | 'rejected';
 
@@ -13,7 +13,22 @@ function ReviewQueue() {
   const [items, setItems] = useState<ReviewedFact[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [saving, setSaving] = useState<string | null>(null); // fact_id being saved
+  const [saving, setSaving] = useState<string | null>(null);
+
+  // Lookup maps for resolving UUIDs to readable names
+  const [docMap, setDocMap] = useState<Map<string, string>>(new Map());
+  const [entityMap, setEntityMap] = useState<Map<string, string>>(new Map());
+
+  // Load documents and entities for name resolution
+  useEffect(() => {
+    getDocuments({ limit: 200 }).then((docs) => {
+      setDocMap(new Map(docs.map((d: Document) => [d.id, d.filename])));
+    }).catch(() => {});
+
+    getEntities({ limit: 500 }).then((res) => {
+      setEntityMap(new Map(res.items.map((e: EntitySummary) => [e.id, e.canonical_name])));
+    }).catch(() => {});
+  }, []);
 
   const loadReviewFacts = useCallback(async () => {
     setLoading(true);
@@ -125,14 +140,14 @@ function ReviewQueue() {
 
                 {/* Metadata row */}
                 <div className="review-fact-meta">
-                  <span>Entity: {fact.entity_id}</span>
-                  <span>Doc: {fact.document_id.slice(0, 24)}…</span>
-                  <span>
+                  <span>🏢 {entityMap.get(fact.entity_id) ?? fact.entity_id.slice(0, 16) + '…'}</span>
+                  <span>📄 {docMap.get(fact.document_id) ?? fact.document_id.slice(0, 20) + '…'}</span>
+                  <span style={{ color: fact.confidence >= 0.8 ? '#10b981' : fact.confidence >= 0.5 ? '#f59e0b' : '#ef4444', fontWeight: 600 }}>
                     Confidence: {Math.round(fact.confidence * 100)}%
                   </span>
                   {fact.temporal_scope && (
                     <span>
-                      Period:{' '}
+                      📅{' '}
                       {(fact.temporal_scope as Record<string, unknown>).period_label as string ?? '—'}
                     </span>
                   )}
