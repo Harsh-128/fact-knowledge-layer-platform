@@ -1,6 +1,14 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 
-import { Fact, exportFactsAsCsv, getFacts } from '../api/client';
+import {
+  Document,
+  EntitySummary,
+  Fact,
+  exportFactsAsCsv,
+  getDocuments,
+  getEntities,
+  getFacts,
+} from '../api/client';
 import FactCard from '../components/FactCard';
 
 const PAGE_SIZE = 50;
@@ -18,9 +26,30 @@ function FactExplorer() {
   const [minConfidence, setMinConfidence] = useState(0);
   const [sortOrder, setSortOrder] = useState<SortOrder>('default');
 
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [entitySuggestions, setEntitySuggestions] = useState<EntitySummary[]>([]);
+  const [entitySearch, setEntitySearch] = useState('');
+  const [showEntitySuggestions, setShowEntitySuggestions] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFact, setSelectedFact] = useState<Fact | null>(null);
+
+  // Fetch documents on mount for the dropdown
+  useEffect(() => {
+    getDocuments({ limit: 100 }).then(setDocuments).catch(() => {});
+  }, []);
+
+  // Entity autocomplete: fetch suggestions when search text changes
+  useEffect(() => {
+    if (entitySearch.length >= 1) {
+      getEntities({ search: entitySearch, limit: 20 })
+        .then((r) => setEntitySuggestions(r.items))
+        .catch(() => {});
+    } else {
+      setEntitySuggestions([]);
+    }
+  }, [entitySearch]);
 
   const loadFacts = useCallback(async (pageOverride?: number) => {
     const currentPage = pageOverride ?? page;
@@ -84,6 +113,9 @@ function FactExplorer() {
     setSortOrder('default');
     setPage(0);
     setSelectedFact(null);
+    setEntitySearch('');
+    setEntitySuggestions([]);
+    setShowEntitySuggestions(false);
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -117,23 +149,53 @@ function FactExplorer() {
 
       <form className="fact-filters" onSubmit={handleSubmit}>
         <div className="filter-field">
-          <label htmlFor="document-id">Document ID</label>
-          <input
+          <label htmlFor="document-id">Document</label>
+          <select
             id="document-id"
             value={documentId}
             onChange={(e) => setDocumentId(e.target.value)}
-            placeholder="document:..."
-          />
+          >
+            <option value="">All documents</option>
+            {documents.map((d) => (
+              <option key={d.id} value={d.id}>{d.filename}</option>
+            ))}
+          </select>
         </div>
 
         <div className="filter-field">
-          <label htmlFor="entity-id">Entity ID</label>
-          <input
-            id="entity-id"
-            value={entityId}
-            onChange={(e) => setEntityId(e.target.value)}
-            placeholder="entity:..."
-          />
+          <label htmlFor="entity-id">Entity</label>
+          <div style={{ position: 'relative' }}>
+            <input
+              id="entity-id"
+              value={entitySearch}
+              onChange={(e) => {
+                setEntitySearch(e.target.value);
+                setEntityId('');
+                setShowEntitySuggestions(true);
+              }}
+              onFocus={() => setShowEntitySuggestions(true)}
+              onBlur={() => setTimeout(() => setShowEntitySuggestions(false), 150)}
+              placeholder="Search entities..."
+            />
+            {showEntitySuggestions && entitySuggestions.length > 0 && (
+              <div className="entity-suggestions">
+                {entitySuggestions.map((ent) => (
+                  <div
+                    key={ent.id}
+                    className="entity-suggestion-item"
+                    onMouseDown={() => {
+                      setEntityId(ent.id);
+                      setEntitySearch(ent.canonical_name);
+                      setShowEntitySuggestions(false);
+                    }}
+                  >
+                    {ent.canonical_name}
+                    <span style={{ color: '#64748b', fontSize: '11px', marginLeft: '8px' }}>{ent.entity_type}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="filter-field">

@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import {
   CompareResponse,
   Document,
+  Fact,
   compareDocuments,
+  getFact,
   getDocuments,
 } from '../api/client';
 import RelationshipBadge from '../components/RelationshipBadge';
@@ -15,6 +17,7 @@ function ComparePage() {
   const [loading, setLoading] = useState(false);
   const [docsLoading, setDocsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [factCache, setFactCache] = useState<Map<string, Fact>>(new Map());
 
   useEffect(() => {
     setDocsLoading(true);
@@ -53,10 +56,31 @@ function ComparePage() {
     setLoading(true);
     setError('');
     setResult(null);
+    setFactCache(new Map());
 
     try {
       const response = await compareDocuments([...selectedIds]);
       setResult(response);
+
+      // Collect all unique fact IDs from relationships
+      const uniqueFactIds = new Set<string>();
+      for (const rel of response.relationships) {
+        uniqueFactIds.add(rel.source_fact_id);
+        uniqueFactIds.add(rel.target_fact_id);
+      }
+
+      // Fetch all facts in parallel
+      const results = await Promise.allSettled(
+        [...uniqueFactIds].map((id) => getFact(id)),
+      );
+
+      const newCache = new Map<string, Fact>();
+      results.forEach((r, idx) => {
+        if (r.status === 'fulfilled') {
+          newCache.set([...uniqueFactIds][idx], r.value);
+        }
+      });
+      setFactCache(newCache);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -190,12 +214,24 @@ function ComparePage() {
                   <div className="relationship-facts">
                     <div className="relationship-fact">
                       <span>Source fact</span>
-                      <strong>{rel.source_fact_id}</strong>
+                      <strong>{factCache.get(rel.source_fact_id)?.attribute ?? rel.source_fact_id}</strong>
+                      {factCache.get(rel.source_fact_id) && (
+                        <p>
+                          {String(factCache.get(rel.source_fact_id)!.value)}
+                          {factCache.get(rel.source_fact_id)!.unit ? ` ${factCache.get(rel.source_fact_id)!.unit}` : ''}
+                        </p>
+                      )}
                     </div>
                     <div className="relationship-arrow">→</div>
                     <div className="relationship-fact">
                       <span>Target fact</span>
-                      <strong>{rel.target_fact_id}</strong>
+                      <strong>{factCache.get(rel.target_fact_id)?.attribute ?? rel.target_fact_id}</strong>
+                      {factCache.get(rel.target_fact_id) && (
+                        <p>
+                          {String(factCache.get(rel.target_fact_id)!.value)}
+                          {factCache.get(rel.target_fact_id)!.unit ? ` ${factCache.get(rel.target_fact_id)!.unit}` : ''}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <RelationshipBadge relationship={rel} />
